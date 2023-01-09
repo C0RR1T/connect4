@@ -1,34 +1,49 @@
 package ch.bbw.m411.connect4;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
     private Integer bestPlay = null;
     private final int maxDepth;
 
+    private final HashMap<Connect4ArenaMain.Stone[], Integer> cache =
+            new HashMap<>();
+
     public PerfectPlayer(int maxDepth) {
         this.maxDepth = maxDepth;
     }
 
+    private long countEmpty() {
+        return Arrays.stream(board).filter(Objects::isNull).count();
+    }
+
     private int minMax(int beta, int alpha,
                        int depth, Connect4ArenaMain.Stone forColor) {
-        if (depth == 0) {
+        if (Connect4ArenaMain.isWinning(board, forColor.opponent()))
+            return Integer.MIN_VALUE + 1;
+        else if (depth == 0) {
             return rate(forColor);
+        } else if (countEmpty() == 0L) {
+            return 0;
         }
         int max = alpha;
         var moves = generateMoves();
         for (var move : moves) {
             board[move] = forColor;
-            int value = -minMax(-max, -beta, depth - 1,
-                    forColor.opponent());
+            int value = -Optional.ofNullable(cache.get(board))
+                    .orElse(minMax(-max, -beta, depth - 1,
+                            forColor.opponent()));
+            if (!cache.containsKey(board))
+                cache.put(board, value);
             board[move] = null;
-            if (value > max) {
+            if (depth == maxDepth) {
+                System.out.printf("At index [%d]: Value %d%n", move, value);
+            }
+            if (value >= max) {
                 max = value;
                 if (depth == this.maxDepth) {
                     this.bestPlay = move;
                 }
-
                 if (max >= beta) {
                     break;
                 }
@@ -37,19 +52,6 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
         }
 
         return max;
-    }
-
-    private int countEmpty() {
-        int count = 0;
-        for (Connect4ArenaMain.Stone stone : board) {
-            if (stone == null)
-                count++;
-        }
-        return count;
-    }
-
-    private int countFilled() {
-        return board.length - countEmpty();
     }
 
     private List<Integer> generateMoves() {
@@ -68,10 +70,10 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
 
     private int rate(Connect4ArenaMain.Stone forStone) {
         if (Connect4ArenaMain.isWinning(board, forStone))
-            return Integer.MAX_VALUE;
+            return 1_000;
 
         if (Connect4ArenaMain.isWinning(board, forStone.opponent()))
-            return Integer.MIN_VALUE;
+            return -1_0000;
 
         var rating = 0;
         for (int i = 0; i < board.length; i++) {
@@ -84,43 +86,16 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
                 case 3 -> rating += 4;
             }
         }
+
         return rating;
-    }
-
-    private int ratingOfRow(int amount) {
-        return amount;
-    }
-
-    private int rowCounting(Step step, int origin,
-                            Connect4ArenaMain.Stone forColor) {
-        int rating = 0;
-        var myCount = 0;
-        for (int i = origin; i >= 0; i = step.nextStep(i)) {
-            var currentStone = board[i];
-
-            if (currentStone == forColor) {
-                myCount++;
-            } else if (currentStone == forColor.opponent()) {
-                rating += ratingOfRow(myCount);
-                myCount = 0;
-            } else {
-                rating += ratingOfRow(myCount);
-                myCount = 0;
-            }
-        }
-        return rating;
-    }
-
-    interface Step {
-        int nextStep(int number);
     }
 
 
     @Override
     int play() {
         bestPlay = null;
-        int originFilled = countFilled();
-        minMax(Integer.MAX_VALUE, Integer.MIN_VALUE, this.maxDepth, myColor);
+        minMax(Integer.MAX_VALUE, Integer.MIN_VALUE, this.maxDepth,
+                myColor);
         return bestPlay;
     }
 }
