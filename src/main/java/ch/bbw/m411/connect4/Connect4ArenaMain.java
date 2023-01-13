@@ -17,7 +17,7 @@ public class Connect4ArenaMain {
     static final int NOMOVE = -1;
 
     public static void main(String[] args) {
-        new Connect4ArenaMain().play(new PerfectPlayer(12), new HumanPlayer());
+        new Connect4ArenaMain().play(new PerfectPlayer(1), new HumanPlayer());
     }
 
     static String toDebugString(Stone[] board) {
@@ -192,7 +192,7 @@ public class Connect4ArenaMain {
 
     public static class HumanPlayer extends DefaultPlayer {
 
-        static String toPrettyString(Stone[] board) {
+        public static String toPrettyString(Stone[] board) {
             var sb = new StringBuilder();
             for (int r = HEIGHT - 1; r >= 0; r--) {
                 for (int c = 0; c < WIDTH; c++) {
