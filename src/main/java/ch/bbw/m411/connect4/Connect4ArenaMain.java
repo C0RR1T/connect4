@@ -17,7 +17,7 @@ public class Connect4ArenaMain {
     static final int NOMOVE = -1;
 
     public static void main(String[] args) {
-        new Connect4ArenaMain().play(new PerfectPlayer(1), new HumanPlayer());
+        new Connect4ArenaMain().play(new PerfectPlayer(12), new HumanPlayer());
     }
 
     static String toDebugString(Stone[] board) {
@@ -199,7 +199,8 @@ public class Connect4ArenaMain {
                     var index = r * WIDTH + c;
                     if (board[index] == null) {
                         if (index < WIDTH || board[index - WIDTH] != null) {
-                            sb.append("\033[37m" + index + "\033[0m ");
+                            sb.append("\033[37m").append(index)
+                                    .append("\033[0m ");
                             if (index < 10) {
                                 sb.append(" ");
                             }

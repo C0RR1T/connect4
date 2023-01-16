@@ -1,6 +1,7 @@
 package ch.bbw.m411.connect4;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -11,7 +12,13 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
     private final int maxDepth;
 
     private final static int MAX_REWARD = 100_000;
+    private final static int MIN_REWARD = -MAX_REWARD;
     private final static int DRAW_REWARD = 0;
+
+    private int winningCount = 0;
+    private int loosingCount = 0;
+    private int drawCount = 0;
+    private int ratingCount = 0;
 
     private final HashMap<String, Integer> cache = new HashMap<>();
 
@@ -21,22 +28,23 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
 
     private int minMax(int beta, int alpha,
                        int depth, Connect4ArenaMain.Stone forColor) {
-        if (Connect4ArenaMain.isWinning(board, forColor))
+        if (Connect4ArenaMain.isWinning(board, forColor)) {
+            winningCount++;
             return MAX_REWARD;
-        if (Connect4ArenaMain.isWinning(board, forColor.opponent()))
-            return -MAX_REWARD;
+        }
+        if (Connect4ArenaMain.isWinning(board, forColor.opponent())) {
+            loosingCount++;
+            return MIN_REWARD;
+        }
 
-        if (depth == 0) {
+        var moves = generateMoves();
+
+        if (moves.size() == 0 || depth == 0) {
+            ratingCount++;
             return rate(forColor);
         }
 
         int max = alpha;
-        var moves = generateMoves();
-
-        if (moves.size() == 0) {
-            return DRAW_REWARD;
-        }
-
 
         for (var move : moves) {
             board[move] = forColor;
@@ -58,10 +66,20 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
             }
         }
 
+        if (maxDepth == depth) {
+            System.out.printf("Winning Paths: %d%nLoosing Paths: " +
+                            "%d%nDrawing Paths: %d%nRating Paths: %d%n",
+                    winningCount, loosingCount, drawCount, ratingCount);
+            winningCount = 0;
+            loosingCount = 0;
+            drawCount = 0;
+            ratingCount = 0;
+        }
+
         return max;
     }
 
-    private List<Integer> generateMoves() {
+    public List<Integer> generateMoves() {
         var list = new ArrayList<Integer>();
         for (Integer i : List.of(3, 2, 4, 5, 1, 0, 6)) {
             for (int y = i; y < board.length; y += 7) {
@@ -77,21 +95,58 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
 
     private int rate(Connect4ArenaMain.Stone forStone) {
         var rating = 0;
+        var opponent = forStone.opponent();
         for (int i = 0; i < board.length; i++) {
-            // Rate the move based on how close it is to the center
-            // i % 7 always goes to 6, then back to 0
             if (board[i] == forStone) {
-                switch (i % 7) {
-                    case 0, 6 -> rating += 1;
-                    case 1, 5 -> rating += 2;
-                    case 2, 4 -> rating += 3;
-                    case 3 -> rating += 4;
-                }
+                rating += checkRow(i, forStone);
+            }
+            if (board[i] == opponent) {
+                rating -= checkRow(i, opponent);
             }
         }
 
         return rating;
     }
+
+    private int checkRow(int i, Connect4ArenaMain.Stone forStone) {
+        int count = 0;
+        // check horizontal
+        for (int j = i % 7; j < board.length; j += 7) {
+            if (board[j] == forStone) {
+                count++;
+            } else {
+                break;
+            }
+        }
+
+        // check vertical
+        for (int j = i; j < board.length; j += 7) {
+            if (board[j] == forStone) {
+                count++;
+            } else {
+                break;
+            }
+        }
+
+        // check diagonal
+        for (int j = i; j < board.length; j += 8) {
+            if (board[j] == forStone) {
+                count++;
+            } else {
+                break;
+            }
+        }
+        for (int j = i; j < board.length; j += 6) {
+            if (board[j] == forStone) {
+                count++;
+            } else {
+                break;
+            }
+        }
+
+        return count;
+    }
+
 
 
     @Override
