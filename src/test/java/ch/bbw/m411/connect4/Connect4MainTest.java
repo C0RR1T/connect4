@@ -83,4 +83,14 @@ class Connect4MainTest implements WithAssertions {
         player.initialize(board, Connect4ArenaMain.Stone.RED);
         assertThat(player.generateMoves()).contains(24);
     }
+
+    @Test
+    void playAgainstSelf() {
+        var play = new Connect4ArenaMain();
+        var deep = new PerfectPlayer(12);
+        var shallow = new PerfectPlayer(1);
+        for (int i = 0; i < 1; i++) {
+            assertThat(play.play(deep, shallow)).isEqualTo(deep);
+        }
+    }
 }

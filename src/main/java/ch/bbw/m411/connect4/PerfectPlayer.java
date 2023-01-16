@@ -1,9 +1,9 @@
 package ch.bbw.m411.connect4;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
 
@@ -11,9 +11,12 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
     private Integer bestPlay = null;
     private final int maxDepth;
 
-    private final static int MAX_REWARD = 100_000;
+    private final static int MAX_REWARD = 10_000;
     private final static int MIN_REWARD = -MAX_REWARD;
-    private final static int DRAW_REWARD = 0;
+
+    private final static int WIN_REWARD = 1_000;
+    private final static int LOOSE_REWARD = -WIN_REWARD;
+
 
     private int winningCount = 0;
     private int loosingCount = 0;
@@ -30,11 +33,11 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
                        int depth, Connect4ArenaMain.Stone forColor) {
         if (Connect4ArenaMain.isWinning(board, forColor)) {
             winningCount++;
-            return MAX_REWARD;
+            return WIN_REWARD;
         }
         if (Connect4ArenaMain.isWinning(board, forColor.opponent())) {
             loosingCount++;
-            return MIN_REWARD;
+            return LOOSE_REWARD;
         }
 
         var moves = generateMoves();
@@ -48,13 +51,21 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
 
         for (var move : moves) {
             board[move] = forColor;
-            int value = -minMax(-max, -beta, depth - 1,
-                    forColor.opponent());
+            var boardString =
+                    Connect4ArenaMain.toDebugString(board);
+            int value =
+                    -Optional.<Integer>empty()
+                            .orElse(minMax(-max,
+                                    -beta,
+                                    depth - 1,
+                                    forColor.opponent()));
+            if (!cache.containsKey(boardString))
+                this.cache.put(boardString, value);
             board[move] = null;
             if (depth == maxDepth) {
                 System.out.printf("At index [%d]: Value %d%n", move, value);
             }
-            if (value >= max) {
+            if (value > max) {
                 max = value;
                 if (depth == this.maxDepth) {
                     this.bestPlay = move;
@@ -79,8 +90,10 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
         return max;
     }
 
+    // Public because of tests
     public List<Integer> generateMoves() {
         var list = new ArrayList<Integer>();
+        var temp = List.of(3, 2, 4, 5, 1, 0, 6);
         for (Integer i : List.of(3, 2, 4, 5, 1, 0, 6)) {
             for (int y = i; y < board.length; y += 7) {
                 if (board[y] == null) {
@@ -148,11 +161,10 @@ public class PerfectPlayer extends Connect4ArenaMain.DefaultPlayer {
     }
 
 
-
     @Override
     int play() {
         bestPlay = null;
-        minMax(Integer.MAX_VALUE, Integer.MIN_VALUE, this.maxDepth,
+        minMax(MAX_REWARD, MIN_REWARD, this.maxDepth,
                 myColor);
 
         return bestPlay;
