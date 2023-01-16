@@ -17,11 +17,11 @@ public class Connect4ArenaMain {
     static final int NOMOVE = -1;
 
     public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1; i++) {
             var play = new Connect4ArenaMain();
-            var corsin = new PerfectPlayer(13);
-            var oli = new PerfectPlayer(13);
-            play.play(corsin, oli);
+            var one = new PerfectPlayer(16);
+            var two = new PerfectPlayer(16);
+            play.play(one, two);
         }
     }
 
@@ -120,6 +120,81 @@ public class Connect4ArenaMain {
                     if (diagonal)
                         return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * More performant solution to the {@link #isWinning(Stone[], Stone)} method. Only checks if the last placed index
+     * is a part of a winning combination.
+     * @param board Current board to check
+     * @param forColor Which color the check should be made for
+     * @param lastPlacedIndex
+     * @return
+     */
+    static boolean isWinning(Stone[] board, Stone forColor, int lastPlacedIndex) {
+        int colorCount;
+
+        // Check horizontal
+        colorCount = 0;
+        for (int i = lastPlacedIndex; i > lastPlacedIndex - 4 && i >= 0; i--) {
+            if (board[i] == forColor) {
+                colorCount++;
+                if (colorCount == 4) {
+                    return true;
+                }
+            } else {
+                colorCount = 0;
+            }
+        }
+
+        for (int i = lastPlacedIndex + 1; i < lastPlacedIndex + 4 && i < board.length; i++) {
+            if (board[i] == forColor) {
+                colorCount++;
+                if (colorCount == 4) {
+                    return true;
+                }
+            } else {
+                colorCount = 0;
+            }
+        }
+
+        // Check vertical
+        colorCount = 0;
+        for (int i = lastPlacedIndex; i > lastPlacedIndex - 4 * 7 && i >= 0; i -= 7) {
+            if (board[i] == forColor) {
+                colorCount++;
+                if (colorCount == 4) {
+                    return true;
+                }
+            } else {
+                colorCount = 0;
+            }
+        }
+
+        // Check diagonal (left to right)
+        colorCount = 0;
+        for (int i = lastPlacedIndex; i > lastPlacedIndex - 4 * 8 && i >= 0; i -= 8) {
+            if (board[i] == forColor) {
+                colorCount++;
+                if (colorCount == 4) {
+                    return true;
+                }
+            } else {
+                colorCount = 0;
+            }
+        }
+        // Check diagonal (right to left)
+        colorCount = 0;
+        for (int i = lastPlacedIndex; i > lastPlacedIndex - 4 * 6 && i >= 0; i -= 6) {
+            if (board[i] == forColor) {
+                colorCount++;
+                if (colorCount == 4) {
+                    return true;
+                }
+            } else {
+                colorCount = 0;
             }
         }
         return false;
