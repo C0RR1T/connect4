@@ -17,7 +17,12 @@ public class Connect4ArenaMain {
     static final int NOMOVE = -1;
 
     public static void main(String[] args) {
-        new Connect4ArenaMain().play(new PerfectPlayer(12), new HumanPlayer());
+        for (int i = 0; i < 10; i++) {
+            var play = new Connect4ArenaMain();
+            var corsin = new PerfectPlayer(13);
+            var oli = new PerfectPlayer(13);
+            play.play(corsin, oli);
+        }
     }
 
     static String toDebugString(Stone[] board) {

@@ -85,12 +85,31 @@ class Connect4MainTest implements WithAssertions {
     }
 
     @Test
-    void playAgainstSelf() {
+    void corsinRed() {
         var play = new Connect4ArenaMain();
-        var deep = new PerfectPlayer(12);
-        var shallow = new PerfectPlayer(1);
-        for (int i = 0; i < 1; i++) {
-            assertThat(play.play(deep, shallow)).isEqualTo(deep);
-        }
+        var corsin = new PerfectPlayer(13);
+        var oli = new OliBot(13);
+        assertThat(play.play(corsin, oli)).isNull();
+    }
+
+    @Test
+    void oliRed() {
+        var play = new Connect4ArenaMain();
+        var corsin = new PerfectPlayer(15);
+        var oli = new OliBot(15);
+        assertThat(play.play(oli, corsin)).isNull();
+    }
+
+    @Test
+    void traceUsage() {
+
+    }
+
+    @Test
+    void singleGame() {
+        var play = new Connect4ArenaMain();
+        var one = new PerfectPlayer(13);
+        var two = new PerfectPlayer(13);
+        assertThat(play.play(one, two)).isNull();
     }
 }
