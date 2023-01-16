@@ -1,15 +1,19 @@
-# Connect Four Template
+# connect4
 
-A start of a project implementing a variant of the game "Connect Four".
+Simple alpha-beta minmax algorithm for the "connect 4" game
 
-## Mission
+## Features
 
-1. Extend the existing code such that the GreedyPlayer works.
-2. Implement a strong Opponent using MinMax/Negamax with fixed depth (like 10).
-3. Implement a perfect Player and optimize it for speed.
+- Complete minmax algorithm
+- Complete and working alpha-beta algorithm
+- Some performance improvements like better isWinning method
+- Dynamic Depth (Scaling up as rounds go on, Early game -> significantly less depth, Late game -> On depth specified)
+- Move ordering for better beta cutoffs
+- Codebase is well documented
 
-## Resources
+This connect4 bot is quite fast and I managed a good experience (-> not long wait times) with a search depth of 20. This
+is on a quite powerful pc, but still. I think my algorithm is optimized enough to work on any machine with search
+depth > 12. I managed to achieve the best results with a search depth of 16, any search depth 15 >= 16 <= 20 It couldn't
+even go to a draw, one of the players would win pretty early on.
 
-- https://de.wikipedia.org/wiki/Minimax-Algorithmus#Implementierung
-- https://de.wikipedia.org/wiki/Alpha-Beta-Suche#Implementierung
-- https://en.wikipedia.org/wiki/Zobrist_hashing
+**If I had to make a mark, I would give myself a 6**
